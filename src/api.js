@@ -5,7 +5,7 @@ class Api {
   constructor() {
     this.baseUrl = process.env.VUE_APP_API_URL;
   }
-
+  
   call(requestType, url, data = null, headers = [], r = false) {
     return new Promise((resolve, reject) => {
       axios[requestType](this.baseUrl + url, data, headers).then(response => {

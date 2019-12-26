@@ -1,5 +1,5 @@
 <template>
-  <f7-page name="home" :page-content="false">
+  <f7-page name="pages" :page-content="false">
     <f7-navbar :title="$root.app.name"></f7-navbar>
     <f7-toolbar tabbar :position="'bottom'">
       <f7-link tab-link="#tab-home" tab-link-active text="Home" icon-fa="home" icon-size="15px"></f7-link>
@@ -7,7 +7,6 @@
       <f7-link tab-link="#tab-categories" text="Categories" icon-fa="list" icon-size="15px"></f7-link>
     </f7-toolbar>
     <f7-tabs animated swipeable>
-
       <f7-tab
         id="tab-home"
         class="page-content infinite-scroll-content"
@@ -16,13 +15,13 @@
         :infinite-distance="50"
         @tab:show="tabHomeShown"
       >
-        <f7-block-title>{{ posts.category ? posts.category.name : 'Latest Posts' }}</f7-block-title>
+        <f7-block-title>{{ pages.category ? pages.category.name : 'Pages' }}</f7-block-title>
         <f7-list media-list>
           <f7-list-item
             link="#"
             :title="item.title"
             :subtitle="(new Date(item.date)).toDateString()"
-            v-for="(item, index) in posts.data"
+            v-for="(item, index) in pages.data"
             :key="'p' + index"
             @click="readMore(item)"
           >
@@ -33,21 +32,6 @@
           <f7-preloader/>
         </f7-block>
       </f7-tab>
-
-      <f7-tab
-        id="tab-pages"
-        class="page-content infinite-scroll-content"
-        tab-active
-        @infinite.native="loadMore"
-        :infinite-distance="50"
-        @tab:show="tabHomeShown">
-        <f7-block-title>Latest Pages</f7-block-title>
-
-        <f7-block class="text-align-center" v-if="loading">
-          <f7-preloader/>
-        </f7-block>
-      </f7-tab>
-
       <f7-tab id="tab-categories" class="page-content" @tab:show="tabCategoriesShown">
         <f7-block-title>Categories</f7-block-title>
         <f7-list>
@@ -57,7 +41,7 @@
             :badge="item.count"
             v-for="(item, index) in categories"
             :key="'c' + index"
-            @click="showCategoryPosts(item)"
+            @click="showCategoryPages(item)"
           ></f7-list-item>
         </f7-list>
       </f7-tab>
@@ -67,9 +51,9 @@
 
 <script>
 export default {
-  name: "home",
+  name: "pages",
   created() {
-    this.getPosts();
+    this.getPages();
     this.getCategories();
   },
   mounted() {
@@ -82,7 +66,7 @@ export default {
   },
   data() {
     return {
-      posts: {
+      pages: {
         page: 1,
         category: null,
         data: []
@@ -93,20 +77,20 @@ export default {
     };
   },
   methods: {
-    getPosts() {
-      let url = "/wp-json/wp/v2/posts?_embed&page=" + this.posts.page;
-      if (this.posts.category) {
+    getPages() {
+      let url = "/wp-json/wp/v2/pages?_embed&page=" + this.pages.page;
+      if (this.pages.category) {
         url =
-          "/wp-json/wp/v2/posts?_embed&categories=" +
-          this.posts.category.id +
+          "/wp-json/wp/v2/pages?_embed&categories=" +
+          this.pages.category.id +
           "&page=" +
-          this.posts.page;
+          this.pages.page;
       }
       this.loading = true;
       window.api
         .call("get", url, null, [], true)
         .then(({ data }) => {
-          let posts = [];
+          let pages = [];
           for (let i = 0; i < data.length; i++) {
             let image = null;
             if (
@@ -121,21 +105,21 @@ export default {
                 data[i]._embedded["wp:featuredmedia"][0].media_details.sizes
                   .medium.source_url;
             }
-            posts.push({
+            pages.push({
               id: data[i].id,
               title: data[i].title.rendered,
               date: data[i].date,
               image: image
             });
           }
-          if (this.posts.category && this.posts.page === 1) {
-            this.posts.data = posts;
+          if (this.pages.category && this.pages.page === 1) {
+            this.pages.data = pages;
             this.allowInfinite = false;
-            if (this.posts.data.length >= this.posts.category.count) {
+            if (this.pages.data.length >= this.pages.category.count) {
               this.loading = false;
             }
           } else {
-            this.posts.data = this.posts.data.concat(posts);
+            this.pages.data = this.pages.data.concat(pages);
             this.allowInfinite = true;
           }
         })
@@ -147,14 +131,14 @@ export default {
     loadMore() {
       if (!this.allowInfinite) return;
       this.allowInfinite = false;
-      this.posts.page += 1;
-      this.getPosts();
+      this.pages.page += 1;
+      this.getPages();
     },
-    readMore(post) {
+    readMore(page) {
       document.removeEventListener("backbutton", this.onBackKeyDown);
-      this.$f7router.navigate("/post/", {
+      this.$f7router.navigate("/page/", {
         props: {
-          post: post
+          page: page
         }
       });
     },
@@ -165,11 +149,11 @@ export default {
           this.categories = data;
         });
     },
-    showCategoryPosts(category) {
-      this.posts.data = [];
-      this.posts.category = category;
-      this.posts.page = 1;
-      this.getPosts();
+    showCategoryPages(category) {
+      this.pages.data = [];
+      this.pages.category = category;
+      this.pages.page = 1;
+      this.getPages();
       this.$f7.tab.show("#tab-home");
     },
     tabHomeShown() {},

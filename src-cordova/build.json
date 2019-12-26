@@ -2,16 +2,16 @@
   "android": {
     "debug": {
       "keystore": "./platforms/android/release.jks",
-      "storePassword": "",
+      "storePassword": "ado33ve79T!",
       "alias": "release",
-      "password": "",
+      "password": "ado33ve79T!",
       "keystoreType": "jks"
     },
     "release": {
       "keystore": "./platforms/android/release.jks",
-      "storePassword": "",
+      "storePassword": "ado33ve79T!",
       "alias": "release",
-      "password": "",
+      "password": "ado33ve79T!",
       "keystoreType": "jks"
     }
   }
